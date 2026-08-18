@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from hashlib import blake2b
-from pathlib import Path
 import re
 from typing import Protocol, Sequence
 
 import numpy as np
 
 from app.config import settings
+from app.services.oci_auth import create_genai_inference_client
 
 
 class EmbeddingProvider(Protocol):
@@ -66,22 +66,8 @@ class OCIEmbeddingProvider:
                 "O pacote 'oci' não está instalado. Execute: pip install -r requirements.txt"
             ) from exc
 
-        config_file = str(Path(settings.oci_config_file).expanduser())
-        config = oci.config.from_file(
-            file_location=config_file,
-            profile_name=settings.oci_profile,
-        )
-        config["region"] = settings.oci_region
-
-        kwargs = {"retry_strategy": oci.retry.DEFAULT_RETRY_STRATEGY}
-        if settings.oci_genai_endpoint:
-            kwargs["service_endpoint"] = settings.oci_genai_endpoint
-
         self._oci = oci
-        self._client = oci.generative_ai_inference.GenerativeAiInferenceClient(
-            config=config,
-            **kwargs,
-        )
+        self._client = create_genai_inference_client(oci)
 
     @property
     def dimension(self) -> int:
@@ -101,10 +87,6 @@ class OCIEmbeddingProvider:
             inputs=list(texts),
             truncate="END",
             input_type=input_type,
-            # Para Cohere Embed 4, omitimos embedding_types.
-            # A OCI usa float como padrão e retorna o resultado em
-            # response.data.embeddings, mantendo compatibilidade com
-            # EmbedTextResult do SDK atual.
             output_dimensions=self.dimension,
         )
 
@@ -112,10 +94,6 @@ class OCIEmbeddingProvider:
 
         raw_embeddings = response.data.embeddings
 
-        # Compatibilidade defensiva: algumas versões/combinações de SDK
-        # podem preencher embeddings_by_type quando embedding types são
-        # solicitados explicitamente. O caminho normal do projeto usa
-        # response.data.embeddings.
         if raw_embeddings is None:
             by_type = getattr(response.data, "embeddings_by_type", None)
             if isinstance(by_type, dict):

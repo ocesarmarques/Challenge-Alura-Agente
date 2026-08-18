@@ -22,6 +22,7 @@ class Settings:
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "900"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "120"))
 
+    oci_auth_mode: str = os.getenv("OCI_AUTH_MODE", "config_file")
     oci_config_file: str = os.getenv("OCI_CONFIG_FILE", "~/.oci/config")
     oci_profile: str = os.getenv("OCI_PROFILE", "DEFAULT")
     oci_region: str = os.getenv("OCI_REGION", "sa-saopaulo-1")

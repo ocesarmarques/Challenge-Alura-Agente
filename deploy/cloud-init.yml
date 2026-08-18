@@ -1,0 +1,11 @@
+#cloud-config
+package_update: true
+packages:
+  - git
+  - curl
+  - ca-certificates
+
+runcmd:
+  - [ bash, -lc, "curl -fsSL https://raw.githubusercontent.com/ocesarmarques/Challenge-Alura-Agente/main/deploy/bootstrap_ubuntu.sh -o /tmp/imobia-bootstrap.sh" ]
+  - [ bash, -lc, "chmod +x /tmp/imobia-bootstrap.sh" ]
+  - [ bash, -lc, "/tmp/imobia-bootstrap.sh > /var/log/imobia-bootstrap.log 2>&1" ]

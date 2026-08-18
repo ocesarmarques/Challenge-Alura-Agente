@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Protocol
 
 from app.agent.prompts import SYSTEM_PROMPT, build_rag_prompt
 from app.config import settings
+from app.services.oci_auth import create_genai_inference_client
 
 
 class ChatProvider(Protocol):
@@ -37,26 +37,8 @@ class OCIChatProvider:
                 "Execute: pip install -r requirements.txt"
             ) from exc
 
-        config_file = str(Path(settings.oci_config_file).expanduser())
-        config = oci.config.from_file(
-            file_location=config_file,
-            profile_name=settings.oci_profile,
-        )
-        config["region"] = settings.oci_region
-
-        kwargs = {
-            "retry_strategy": oci.retry.DEFAULT_RETRY_STRATEGY,
-        }
-        if settings.oci_genai_endpoint:
-            kwargs["service_endpoint"] = settings.oci_genai_endpoint
-
         self._oci = oci
-        self._client = (
-            oci.generative_ai_inference.GenerativeAiInferenceClient(
-                config=config,
-                **kwargs,
-            )
-        )
+        self._client = create_genai_inference_client(oci)
 
     def generate(self, question: str, context: str) -> str:
         models = self._oci.generative_ai_inference.models
