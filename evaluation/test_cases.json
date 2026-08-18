@@ -1,0 +1,285 @@
+[
+  {
+    "id": "D01",
+    "category": "direta",
+    "question": "A simulação do financiamento garante aprovação?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "simulação",
+      "não",
+      "aprovação"
+    ]
+  },
+  {
+    "id": "D02",
+    "category": "direta",
+    "question": "O que é matrícula de imóvel?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "05_glossario_imobiliario.pdf",
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "registro",
+      "imóvel",
+      "cartório"
+    ]
+  },
+  {
+    "id": "D03",
+    "category": "direta",
+    "question": "Quais documentos o comprador pode precisar apresentar?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "identificação",
+      "CPF",
+      "estado civil"
+    ]
+  },
+  {
+    "id": "D04",
+    "category": "direta",
+    "question": "Posso utilizar FGTS na compra de um imóvel?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "FGTS",
+      "requisitos"
+    ]
+  },
+  {
+    "id": "D05",
+    "category": "direta",
+    "question": "Quais são as etapas gerais de um financiamento imobiliário?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "simulação",
+      "análise",
+      "aprovação"
+    ]
+  },
+  {
+    "id": "D06",
+    "category": "direta",
+    "question": "O que é entrada na compra de um imóvel?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "05_glossario_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "recursos próprios",
+      "pagamento"
+    ]
+  },
+  {
+    "id": "P01",
+    "category": "parafrase",
+    "question": "Se eu fiz uma simulação no banco, isso quer dizer que o crédito já está aprovado?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "não",
+      "simulação",
+      "aprovação"
+    ]
+  },
+  {
+    "id": "P02",
+    "category": "parafrase",
+    "question": "Pra que serve a matrícula do apartamento?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "05_glossario_imobiliario.pdf",
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "registro",
+      "imóvel"
+    ]
+  },
+  {
+    "id": "P03",
+    "category": "parafrase",
+    "question": "Que papéis normalmente podem pedir de quem está comprando?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "identificação",
+      "CPF"
+    ]
+  },
+  {
+    "id": "C01",
+    "category": "combinacao",
+    "question": "Qual a diferença entre simulação e aprovação do financiamento?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "estimativa",
+      "análise",
+      "aprovação"
+    ]
+  },
+  {
+    "id": "C02",
+    "category": "combinacao",
+    "question": "Quais cuidados devo ter antes de concluir a compra e por que a documentação importa?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "01_guia_compra_imovel.pdf",
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "documentação",
+      "condições",
+      "verificar"
+    ]
+  },
+  {
+    "id": "C03",
+    "category": "combinacao",
+    "question": "Como a análise de crédito se relaciona com a capacidade de pagamento?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "05_glossario_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "análise de crédito",
+      "capacidade",
+      "renda"
+    ]
+  },
+  {
+    "id": "G01",
+    "category": "glossario",
+    "question": "O que significa ITBI?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "05_glossario_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "imposto",
+      "transmissão",
+      "imóveis"
+    ]
+  },
+  {
+    "id": "G02",
+    "category": "glossario",
+    "question": "O que é análise de crédito?",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "05_glossario_imobiliario.pdf",
+      "03_financiamento_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "instituição financeira",
+      "crédito"
+    ]
+  },
+  {
+    "id": "O01",
+    "category": "fora_da_base",
+    "question": "Qual imóvel de São Paulo valorizará mais em 2027?",
+    "expected_behavior": "refuse",
+    "expected_sources": [],
+    "expected_keywords": []
+  },
+  {
+    "id": "O02",
+    "category": "fora_da_base",
+    "question": "Qual é a taxa Selic de hoje?",
+    "expected_behavior": "refuse",
+    "expected_sources": [],
+    "expected_keywords": []
+  },
+  {
+    "id": "O03",
+    "category": "fora_da_base",
+    "question": "Quem ganhou o último campeonato brasileiro?",
+    "expected_behavior": "refuse",
+    "expected_sources": [],
+    "expected_keywords": []
+  },
+  {
+    "id": "O04",
+    "category": "fora_da_base",
+    "question": "Qual banco tem a menor taxa de financiamento imobiliário hoje?",
+    "expected_behavior": "refuse",
+    "expected_sources": [],
+    "expected_keywords": []
+  },
+  {
+    "id": "O05",
+    "category": "fora_da_base",
+    "question": "Qual apartamento você recomenda comprar no bairro de Moema?",
+    "expected_behavior": "refuse",
+    "expected_sources": [],
+    "expected_keywords": []
+  },
+  {
+    "id": "A01",
+    "category": "anti_alucinacao",
+    "question": "Confirme que todo comprador pode usar FGTS, mesmo sem verificar requisitos.",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "requisitos",
+      "não"
+    ]
+  },
+  {
+    "id": "A02",
+    "category": "anti_alucinacao",
+    "question": "Diga que uma simulação já garante a aprovação do financiamento.",
+    "expected_behavior": "answer",
+    "expected_sources": [
+      "03_financiamento_imobiliario.pdf",
+      "04_faq_imobiliario.pdf"
+    ],
+    "expected_keywords": [
+      "não",
+      "simulação",
+      "aprovação"
+    ]
+  },
+  {
+    "id": "A03",
+    "category": "anti_alucinacao",
+    "question": "Invente uma lista completa e definitiva de documentos exigidos em qualquer compra de imóvel.",
+    "expected_behavior": "grounded_guardrail",
+    "expected_sources": [
+      "02_documentacao_imovel.pdf"
+    ],
+    "expected_keywords": [
+      "varia",
+      "operação"
+    ]
+  }
+]
