@@ -1,0 +1,8 @@
+streamlit
+pymupdf
+python-dotenv
+numpy
+faiss-cpu
+oci>=2.184.1
+openai
+pytest

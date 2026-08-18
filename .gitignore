@@ -1,0 +1,17 @@
+.venv/
+venv/
+.env
+*.pem
+*.key
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
+data/vector_store/*
+!data/vector_store/.gitkeep
+*.log
+
+# Resultados locais de avaliação
+evaluation/results/*
+!evaluation/results/.gitkeep

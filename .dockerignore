@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+.env
+*.pem
+*.key
+__pycache__
+.pytest_cache
+.vscode
+.idea
+evaluation/results/*
+data/vector_store/*
+*.log
