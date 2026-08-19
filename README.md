@@ -1,48 +1,31 @@
 # 🏠 ImobIA — Agente Inteligente de Orientação Imobiliária
 
-O **ImobIA** é um agente inteligente desenvolvido para o **Challenge Alura Agente**.  
-Ele utiliza **RAG (Retrieval-Augmented Generation)** para responder perguntas em linguagem natural com base em uma coleção de documentos PDF sobre compra de imóveis, documentação, financiamento e conceitos imobiliários.
+O **ImobIA** é um agente inteligente desenvolvido para o **Challenge Alura Agente**. Ele utiliza **RAG (Retrieval-Augmented Generation)** para responder perguntas em linguagem natural com base em uma coleção de documentos PDF sobre compra de imóveis, documentação, financiamento, FGTS e conceitos imobiliários.
 
-O objetivo do projeto é demonstrar uma aplicação de IA generativa com **recuperação semântica, grounding documental, controle de alucinação, interface conversacional e integração real com Oracle Cloud Infrastructure (OCI)**.
+O projeto combina **recuperação semântica, grounding documental, controle de alucinação, interface conversacional e integração real com Oracle Cloud Infrastructure (OCI)**.
 
----
+> **Aplicação publicada na OCI:** http://140.238.185.94:8501
 
-## 📌 Visão geral
-
-Em vez de responder apenas com o conhecimento geral de um modelo de linguagem, o ImobIA segue este fluxo:
-
-1. recebe a pergunta do usuário;
-2. transforma a pergunta em embedding;
-3. busca os trechos mais relevantes da base documental;
-4. aplica um limiar mínimo de relevância;
-5. envia apenas o contexto recuperado ao modelo generativo;
-6. gera uma resposta fundamentada;
-7. informa os documentos e páginas utilizados como fonte.
-
-Quando não existe contexto suficientemente relevante, o LLM **não é chamado** e o agente retorna:
-
-> Não encontrei informação suficiente na minha base de conhecimento para responder a essa pergunta.
-
-Esse comportamento reduz respostas inventadas e torna o funcionamento do agente mais transparente.
+> **Aviso:** a base de conhecimento é fictícia e educacional. O ImobIA não substitui orientação jurídica, financeira, bancária ou imobiliária profissional.
 
 ---
 
 ## ✨ Principais funcionalidades
 
-- 📄 leitura automática de documentos PDF;
-- ✂️ divisão do conteúdo em chunks com metadados;
-- 🧠 embeddings via **OCI Generative AI — Cohere Embed 4**;
-- 🔎 busca vetorial com **FAISS**;
-- 🤖 geração de respostas com **Cohere Command A**;
-- 🛡️ limiar de relevância para evitar respostas fora da base;
-- 📚 exibição de documento e página utilizados na resposta;
-- 💬 interface conversacional em **Streamlit**;
-- 🕘 histórico da conversa durante a sessão;
-- 💡 perguntas sugeridas para demonstração;
-- 🧪 suíte automatizada de testes;
-- 📊 avaliação formal do RAG com 22 casos;
-- 🔐 auditoria para impedir publicação de credenciais no GitHub;
-- 🐳 preparação para execução com Docker.
+- leitura automática de documentos PDF com **PyMuPDF**;
+- divisão do conteúdo em chunks com metadados de documento e página;
+- embeddings via **OCI Generative AI — Cohere Embed 4**;
+- busca vetorial com **FAISS**;
+- geração de respostas com **Cohere Command A**;
+- limiar mínimo de relevância antes da chamada ao LLM;
+- resposta fixa de insuficiência quando a base não sustenta a pergunta;
+- exibição das fontes utilizadas na resposta;
+- interface conversacional em **Streamlit**;
+- histórico durante a sessão e perguntas sugeridas;
+- autenticação OCI local por arquivo de configuração;
+- autenticação em produção por **Instance Principal**, sem chave privada na VM;
+- suíte automatizada de testes e avaliação formal do RAG;
+- deploy público em **OCI Compute** com serviço `systemd`.
 
 ---
 
@@ -54,12 +37,11 @@ flowchart TD
     B --> C[Texto por página]
     C --> D[Chunking + metadados]
     D --> E[Cohere Embed 4<br/>OCI Generative AI]
-    E --> F[Índice vetorial FAISS]
+    E --> F[FAISS]
 
     U[Usuário] --> S[Streamlit]
-    S --> Q[Pergunta]
-    Q --> QE[Embedding da pergunta]
-    QE --> F
+    S --> Q[Embedding da pergunta]
+    Q --> F
     F --> R[Retriever semântico]
     R --> T{Score >= 0.32?}
 
@@ -75,24 +57,24 @@ flowchart TD
 ### Fluxo resumido
 
 ```text
-Pergunta
-   ↓
-Embedding OCI
-   ↓
+PDFs
+  ↓
+PyMuPDF
+  ↓
+chunks + metadados
+  ↓
+OCI Cohere Embed 4
+  ↓
 FAISS
-   ↓
-Retriever
-   ↓
-Filtro de relevância (0.32)
-   ↓
-Contexto documental
-   ↓
-Cohere Command A
-   ↓
-Resposta + fontes
+  ↓
+pergunta → embedding → top-k
+  ↓
+score >= 0.32 ?
+  ├─ não → resposta de insuficiência
+  └─ sim → contexto → Cohere Command A → resposta + fontes
 ```
 
-Mais detalhes: [`docs/arquitetura.md`](docs/arquitetura.md).
+Mais detalhes em [`docs/arquitetura.md`](docs/arquitetura.md).
 
 ---
 
@@ -103,46 +85,45 @@ O projeto utiliza cinco PDFs fictícios e educacionais:
 | Documento | Conteúdo principal |
 |---|---|
 | `01_guia_compra_imovel.pdf` | etapas e cuidados gerais na compra de um imóvel |
-| `02_documentacao_imovel.pdf` | documentos e verificações relacionadas à operação |
+| `02_documentacao_imovel.pdf` | documentação e verificações relacionadas à operação |
 | `03_financiamento_imobiliario.pdf` | simulação, análise de crédito, aprovação, entrada e FGTS |
 | `04_faq_imobiliario.pdf` | perguntas frequentes sobre o processo de compra |
-| `05_glossario_imobiliario.pdf` | definições de termos como matrícula, ITBI e análise de crédito |
+| `05_glossario_imobiliario.pdf` | definições de termos imobiliários |
 
-Os arquivos estão em:
-
-```text
-data/documents/
-```
-
-> **Importante:** a base foi criada exclusivamente para fins educacionais e de demonstração. O ImobIA não substitui orientação jurídica, financeira, bancária ou imobiliária profissional.
+Os arquivos estão em `data/documents/`.
 
 ---
 
-## 🧰 Tecnologias utilizadas
+## 🧰 Tecnologias
 
-| Tecnologia | Uso no projeto |
+| Tecnologia | Uso |
 |---|---|
 | Python 3.12 | linguagem principal |
-| Streamlit | interface web conversacional |
+| Streamlit | interface web |
 | PyMuPDF | leitura dos PDFs |
 | NumPy | manipulação numérica |
 | FAISS CPU | índice e busca vetorial |
-| OCI Python SDK | integração com Oracle Cloud |
+| OCI Python SDK | integração com a Oracle Cloud |
 | OCI Generative AI | embeddings e chat |
 | Cohere Embed 4 | embeddings semânticos |
 | Cohere Command A | geração das respostas |
-| python-dotenv | variáveis de ambiente |
+| python-dotenv | configuração por variáveis de ambiente |
 | Pytest | testes automatizados |
-| Docker | empacotamento da aplicação |
+| systemd | execução persistente na VM OCI |
 
-### Modelos configurados
+### Modelos e parâmetros principais
 
 ```text
 Embeddings: cohere.embed-v4.0
-Dimensão:   1024
+Dimensão: 1024
 
-Chat:       cohere.command-a-03-2025
+Chat: cohere.command-a-03-2025
 Temperatura: 0.10
+
+TOP_K=5
+MIN_RELEVANCE_SCORE=0.32
+CHUNK_SIZE=900
+CHUNK_OVERLAP=120
 ```
 
 ---
@@ -153,31 +134,18 @@ Temperatura: 0.10
 Challenge-Alura-Agente/
 ├── app/
 │   ├── agent/
-│   │   ├── agent.py
-│   │   ├── factory.py
-│   │   └── prompts.py
 │   ├── evaluation/
-│   │   └── metrics.py
 │   ├── rag/
-│   │   ├── chunker.py
-│   │   ├── embeddings.py
-│   │   ├── loader.py
-│   │   ├── pipeline.py
-│   │   ├── retriever.py
-│   │   └── vector_store.py
 │   ├── services/
-│   │   └── llm.py
 │   ├── ui/
-│   │   └── components.py
 │   ├── config.py
 │   └── main.py
 ├── data/
 │   ├── documents/
 │   └── vector_store/
+├── deploy/
 ├── docs/
 ├── evaluation/
-│   ├── test_cases.json
-│   └── results/
 ├── scripts/
 ├── tests/
 ├── .env.example
@@ -189,17 +157,7 @@ Challenge-Alura-Agente/
 
 ---
 
-## ⚙️ Pré-requisitos
-
-- Python **3.12+**;
-- conta OCI com acesso ao **Generative AI**;
-- autenticação OCI configurada;
-- Git;
-- acesso à internet para chamadas ao OCI Generative AI.
-
----
-
-## 🚀 Como executar localmente
+## 🚀 Execução local
 
 ### 1. Clonar o repositório
 
@@ -210,24 +168,14 @@ cd Challenge-Alura-Agente
 
 ### 2. Criar o ambiente virtual
 
-Linux/macOS:
-
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
-Windows PowerShell:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-### 3. Instalar as dependências
+### 3. Instalar dependências
 
 ```bash
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
@@ -237,149 +185,114 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-No Windows, copie manualmente `.env.example` para `.env`.
-
-O arquivo contém parâmetros como:
+Configuração principal:
 
 ```dotenv
 APP_TITLE=ImobIA
 TOP_K=5
 MIN_RELEVANCE_SCORE=0.32
+CHUNK_SIZE=900
+CHUNK_OVERLAP=120
 
+OCI_AUTH_MODE=config_file
 OCI_PROFILE=DEFAULT
 OCI_REGION=sa-saopaulo-1
 OCI_COMPARTMENT_ID=
 
 OCI_EMBEDDING_MODEL_ID=cohere.embed-v4.0
 EMBEDDING_DIMENSIONS=1024
+EMBEDDING_BATCH_SIZE=32
 
 OCI_CHAT_MODEL_ID=cohere.command-a-03-2025
 CHAT_TEMPERATURE=0.10
+CHAT_MAX_TOKENS=700
 ```
 
-Preencha apenas os valores específicos da sua tenancy, principalmente:
+Para execução local, configure `~/.oci/config` e informe `OCI_COMPARTMENT_ID` no `.env`.
 
-```text
-OCI_COMPARTMENT_ID
-```
-
----
-
-## 🔐 Configuração da OCI
-
-Para execução local, o projeto utiliza o arquivo padrão do OCI SDK:
-
-```text
-~/.oci/config
-```
-
-Exemplo estrutural:
-
-```ini
-[DEFAULT]
-user=<SEU_USER_OCID>
-fingerprint=<SUA_FINGERPRINT>
-tenancy=<SEU_TENANCY_OCID>
-region=sa-saopaulo-1
-key_file=/caminho/para/sua/chave_privada.pem
-```
-
-### Nunca publique
-
-- `.env`;
-- arquivo `~/.oci/config`;
-- chaves privadas `.pem`;
-- tokens;
-- credenciais;
-- OCIDs pessoais preenchidos em arquivos versionados.
-
-O `.gitignore` e o script de auditoria do projeto adicionam uma camada de proteção contra publicação acidental.
-
-### Validar ambiente e autenticação
+### 5. Validar acesso ao OCI Generative AI
 
 ```bash
-python -m scripts.check_environment
-python -m scripts.check_oci_auth
 python -m scripts.check_genai_access
 ```
 
-Esses scripts verificam, respectivamente:
-
-1. ambiente Python e dependências;
-2. autenticação com a OCI;
-3. acesso real aos modelos de embedding e chat.
-
----
-
-## 🔎 Criar o índice vetorial
-
-Depois da configuração da OCI:
+### 6. Criar o índice vetorial
 
 ```bash
 python -m scripts.build_index
 ```
 
-O processo:
-
-```text
-PDFs
- ↓
-extração de texto
- ↓
-chunks
- ↓
-embeddings OCI
- ↓
-normalização
- ↓
-FAISS
- ↓
-index.faiss + metadata.json
-```
-
-Os arquivos gerados ficam em:
-
-```text
-data/vector_store/
-```
-
-Eles são artefatos locais e não são versionados.
-
----
-
-## 💬 Executar a interface
-
-```bash
-streamlit run app/main.py
-```
-
-ou:
+### 7. Executar o Streamlit
 
 ```bash
 python -m streamlit run app/main.py
 ```
 
-Depois acesse:
+Acesse `http://localhost:8501`.
 
-```text
-http://localhost:8501
+---
+
+## ☁️ Deploy na Oracle Cloud Infrastructure
+
+O deploy final foi realizado em **OCI Compute**, na região `sa-saopaulo-1`.
+
+### Ambiente publicado
+
+| Item | Configuração |
+|---|---|
+| Cloud | Oracle Cloud Infrastructure |
+| Região | `sa-saopaulo-1` |
+| Compute | `VM.Standard.E2.1.Micro` |
+| Sistema | Oracle Linux 9 |
+| Aplicação | Streamlit |
+| Porta | `8501/TCP` |
+| Autenticação OCI | Instance Principal |
+| Processo persistente | `systemd` |
+| URL pública | **http://140.238.185.94:8501** |
+
+### Autenticação em produção
+
+Na VM, o ImobIA utiliza:
+
+```dotenv
+OCI_AUTH_MODE=instance_principal
 ```
 
-A interface apresenta:
+O acesso ao OCI Generative AI é concedido por **Dynamic Group + IAM Policy**. Nenhuma chave privada OCI é necessária dentro da aplicação publicada.
 
-- chat;
-- histórico da sessão;
-- perguntas sugeridas;
-- status do RAG;
-- informações da base;
-- fontes utilizadas;
-- opção de iniciar uma nova conversa.
+O ambiente de runtime é gerado com informações da própria instância via IMDSv2:
+
+```bash
+sh scripts/generate_oci_runtime_env.sh
+cp .env.production .env
+```
+
+### Validações realizadas na VM
+
+Foram validados com sucesso:
+
+- Instance Principal;
+- embedding real com dimensão **1024**;
+- resposta real do **Cohere Command A**;
+- criação do índice FAISS;
+- carregamento da interface Streamlit;
+- resposta RAG com fontes documentais;
+- acesso externo pela porta `8501`;
+- execução persistente via `systemd`.
+
+O serviço foi configurado para iniciar automaticamente com a instância.
+
+### Evidência de deploy
+
+A aplicação está acessível publicamente em:
+
+**http://140.238.185.94:8501**
+
+Também foram registradas capturas da aplicação funcionando e da instância OCI em estado **Em execução** para a entrega do Challenge.
 
 ---
 
 ## 💡 Exemplos de perguntas
-
-Perguntas que o ImobIA consegue responder com a base atual:
 
 ```text
 A simulação do financiamento garante aprovação?
@@ -394,7 +307,7 @@ Posso utilizar FGTS na compra de um imóvel?
 ```
 
 ```text
-O que é matrícula de imóvel?
+O que é uma matrícula de imóvel?
 ```
 
 ```text
@@ -409,21 +322,17 @@ Pergunta:
 Qual imóvel de São Paulo valorizará mais em 2027?
 ```
 
-Comportamento esperado:
+Resposta esperada:
 
 ```text
 Não encontrei informação suficiente na minha base de conhecimento para responder a essa pergunta.
 ```
 
-Nesse cenário:
-
-- nenhum trecho ultrapassa o limiar mínimo;
-- o LLM não é chamado;
-- nenhuma fonte é inventada.
+Nesse cenário, o LLM não é chamado e nenhuma fonte é inventada.
 
 ---
 
-## 🛡️ Estratégia contra alucinação
+## 🛡️ Controle de alucinação
 
 O ImobIA utiliza duas barreiras principais.
 
@@ -435,149 +344,63 @@ O melhor contexto recuperado precisa atingir:
 MIN_RELEVANCE_SCORE=0.32
 ```
 
-Caso contrário, a execução é interrompida antes da geração.
+Se o limiar não for atingido, a execução é interrompida antes da geração.
 
-### 2. Prompt de grounding
+### 2. Grounding no prompt
 
-Quando existe contexto válido, o modelo recebe instruções para:
+Quando existe contexto válido, o modelo é instruído a:
 
-- responder apenas com base nos trechos fornecidos;
+- responder somente com base nos trechos recuperados;
 - não preencher lacunas com conhecimento externo;
-- não inventar informações;
-- reconhecer quando a base não sustenta determinada conclusão.
-
-Isso permite distinguir entre:
-
-- **pergunta fora da base** → LLM não chamado;
-- **pergunta válida, mas com premissa incorreta** → LLM usa a base para corrigir a premissa;
-- **pedido para inventar informação** → resposta fundamentada explica a limitação.
+- não inventar fatos;
+- reconhecer quando a base não sustenta uma conclusão.
 
 ---
 
-## 🧪 Testes automatizados
+## 🧪 Testes e avaliação
 
-Execute:
+Execute os testes automatizados com:
 
 ```bash
 python -m pytest -q
 ```
 
-Validação técnica realizada antes da publicação desta versão:
+Além da suíte de testes, o projeto possui uma avaliação formal ponta a ponta com **22 casos**, cobrindo:
 
-```text
-34 passed
-1 skipped
-0 failed
-```
+- perguntas diretas;
+- paráfrases;
+- combinação de informações;
+- glossário;
+- perguntas fora da base;
+- anti-alucinação.
 
-O teste pulado depende de condição específica de ambiente e não representa falha da aplicação.
-
----
-
-## 📊 Avaliação formal do RAG
-
-Além dos testes de código, o projeto possui uma bateria de **22 casos de avaliação ponta a ponta**.
-
-Categorias avaliadas:
-
-| Categoria | Objetivo |
-|---|---|
-| perguntas diretas | validar recuperação de fatos da base |
-| paráfrases | verificar compreensão semântica |
-| combinação | recuperar informações relacionadas |
-| glossário | validar conceitos e definições |
-| fora da base | verificar recusa segura |
-| anti-alucinação | testar resistência a premissas incorretas ou pedidos de invenção |
-
-### Resultado final
+### Resultado final da avaliação RAG
 
 | Métrica | Resultado |
 |---|---:|
 | Casos avaliados | **22** |
 | Casos aprovados | **22/22** |
-| Taxa geral | **100,0%** |
-| Respostas válidas | **100,0%** |
-| Recusas corretas | **100,0%** |
+| Taxa geral | **100%** |
+| Respostas válidas | **100%** |
+| Recusas corretas | **100%** |
 | Latência média observada | **1,51 s** |
-| Falhas técnicas na avaliação final | **0** |
+| Falhas técnicas | **0** |
 
-A primeira execução da bateria revelou dois falsos positivos de retrieval em perguntas fora da base. Após análise dos scores, o limiar foi calibrado de `0.30` para `0.32`.
-
-A avaliação também passou a distinguir corretamente uma **recusa por ausência de contexto** de um **guardrail fundamentado**.
-
-### Executar a avaliação
+Execute novamente com:
 
 ```bash
 python -m scripts.run_evaluation
 ```
 
-São gerados localmente:
-
-```text
-evaluation/results/evaluation_results.json
-evaluation/results/evaluation_results.csv
-evaluation/results/evaluation_report.md
-```
-
-Detalhes: [`docs/AVALIACAO.md`](docs/AVALIACAO.md).
-
----
-
-## 🐳 Docker
-
-O projeto já contém um `Dockerfile` baseado em Python 3.12.
-
-Build:
-
-```bash
-docker build -t imobia .
-```
-
-Execução:
-
-```bash
-docker run --rm -p 8501:8501 \
-  --env-file .env \
-  imobia
-```
-
-> Para autenticação OCI dentro do container ou em uma instância de cloud, a estratégia de credenciais deve ser configurada adequadamente. O deploy definitivo será documentado após a publicação da aplicação na OCI.
-
----
-
-## ☁️ Oracle Cloud Infrastructure
-
-O projeto já foi validado utilizando:
-
-- OCI Python SDK;
-- autenticação real da tenancy;
-- OCI Generative AI;
-- Cohere Embed 4;
-- Cohere Command A;
-- região `sa-saopaulo-1`.
-
-### Status atual
-
-| Item | Status |
-|---|---|
-| Integração OCI SDK | ✅ |
-| Autenticação OCI local | ✅ |
-| Embeddings OCI | ✅ |
-| Chat OCI | ✅ |
-| RAG ponta a ponta | ✅ |
-| Interface local | ✅ |
-| Dockerfile | ✅ |
-| Deploy público da aplicação | 🚧 próxima etapa |
-
-A URL pública e as evidências do deploy serão adicionadas ao README quando a aplicação estiver publicada.
+Mais detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md).
 
 ---
 
 ## 🔒 Segurança
 
-O projeto foi preparado para não versionar segredos.
+O projeto não versiona credenciais ou artefatos sensíveis.
 
-Proteções existentes:
+Proteções principais do `.gitignore`:
 
 ```text
 .env
@@ -588,13 +411,19 @@ data/vector_store/*
 evaluation/results/*
 ```
 
-Também existe:
+Nunca publique:
+
+- chave privada OCI;
+- arquivo `~/.oci/config` real;
+- tokens;
+- credenciais;
+- `.env` preenchido com dados privados.
+
+O repositório também inclui auditoria de segurança:
 
 ```bash
 python -m scripts.security_audit
 ```
-
-Esse comando verifica arquivos sensíveis e padrões críticos antes da publicação.
 
 ---
 
@@ -604,30 +433,34 @@ Esse comando verifica arquivos sensíveis e padrões críticos antes da publica�
 |---|---|
 | [`docs/arquitetura.md`](docs/arquitetura.md) | arquitetura técnica do RAG |
 | [`docs/AVALIACAO.md`](docs/AVALIACAO.md) | metodologia e resultados da avaliação |
-| [`docs/FASE6_GUIA_EXECUCAO.md`](docs/FASE6_GUIA_EXECUCAO.md) | preparação e validação do ambiente OCI |
-| [`docs/POLITICAS_OCI.md`](docs/POLITICAS_OCI.md) | permissões OCI utilizadas |
+| [`docs/DEPLOY_OCI.md`](docs/DEPLOY_OCI.md) | preparação para deploy OCI |
+| [`docs/POLITICAS_OCI.md`](docs/POLITICAS_OCI.md) | permissões OCI |
+| [`docs/FASE6_GUIA_EXECUCAO.md`](docs/FASE6_GUIA_EXECUCAO.md) | validação do ambiente OCI |
 | [`docs/FASE7_UX_INTERFACE.md`](docs/FASE7_UX_INTERFACE.md) | evolução da interface |
 | [`docs/FASE8_1_CALIBRACAO.md`](docs/FASE8_1_CALIBRACAO.md) | calibração do retrieval |
-| [`docs/FASE9_GITHUB.md`](docs/FASE9_GITHUB.md) | estratégia de publicação e segurança Git |
+| [`docs/FASE9_GITHUB.md`](docs/FASE9_GITHUB.md) | publicação e segurança Git |
 
 ---
 
-## 🎯 Requisitos do Challenge
+## 🎯 Checklist do Challenge
 
-| Requisito | Implementação |
+| Requisito | Status |
 |---|---|
 | base de conhecimento em PDF/CSV | ✅ 5 PDFs |
 | leitura e processamento dos documentos | ✅ PyMuPDF + chunking |
 | perguntas em linguagem natural | ✅ |
 | agente com IA generativa | ✅ OCI Generative AI |
 | recuperação contextual | ✅ FAISS + embeddings |
+| controle de respostas fora da base | ✅ |
 | interface funcional | ✅ Streamlit |
 | repositório público GitHub | ✅ |
 | histórico de commits | ✅ |
 | README com arquitetura, tecnologias e execução | ✅ |
 | exemplos de perguntas e respostas | ✅ |
-| testes do agente | ✅ 22/22 na avaliação formal |
-| deploy OCI | 🚧 em preparação |
+| testes do agente | ✅ |
+| avaliação formal | ✅ 22/22 |
+| deploy OCI | ✅ público |
+| evidência de deploy | ✅ URL pública + capturas |
 
 ---
 
@@ -643,8 +476,6 @@ A versão atual:
 - não substitui orientação jurídica, financeira ou bancária;
 - não mantém memória persistente entre sessões.
 
-Essas limitações são intencionais e ajudam a manter o agente dentro do escopo demonstrado pela base de conhecimento.
-
 ---
 
 ## 👨‍💻 Autor
@@ -655,9 +486,9 @@ Projeto desenvolvido para o **Challenge Alura Agente**, explorando RAG, IA gener
 
 ---
 
-## 📌 Status do projeto
+## ✅ Status final
 
-**Em fase final de entrega.**
+**Projeto concluído e pronto para entrega.**
 
 ```text
 ✅ Base documental
@@ -669,7 +500,7 @@ Projeto desenvolvido para o **Challenge Alura Agente**, explorando RAG, IA gener
 ✅ Controle de alucinação
 ✅ Avaliação 22/22
 ✅ GitHub público
-✅ Documentação principal
-🚧 Deploy público OCI
-⬜ Evidências finais
+✅ Documentação
+✅ Deploy público OCI
+✅ Evidências finais
 ```
